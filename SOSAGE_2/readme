@@ -1,0 +1,21 @@
+SObol Sequence Algorithm GEnerator (SOSAGE)
+
+
+Beam_Param.m	compute beam parameter of beam
+Crop_Image.m	crop the image given a ROI selected with the mouse
+dump_Astra.m	dump phase space in Astra format
+dump_Parmela.m	dump phase space in Parmela format (un-tested)
+Gaussian1.m	generate random number with a Gaussian distribution
+Generator.m	main program that generates a phase space distribution
+		given the laser transverse distribution
+Offset.m	offset the beam coordinates
+RotateXY.m      rotate the beam coordinates
+ScaleXY.m	scale the beam coordinates
+sobseqm2.c	sobol sequence 2
+sobseqm2.mexglx mex file of the previous file obtained by mex soseqm2.c
+sobseqm4.c      sobol sequence that generate a 2D array given an image
+sobseqm4.mexglx mex file of the previous file obtained by mex soseqm4.c
+Thermal.m       generate PX, PY, PZ given the excess kinetic energy at
+		photoemission (thermal emittance)
+LFDneg10.bmp	example input from AWA.
+
