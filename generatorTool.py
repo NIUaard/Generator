@@ -20,7 +20,7 @@ def Unif_1d (n, skip=None):
    '''
    global DEB
    if DEB==1:
-      print '>>>> Unif_1d'
+      print ('>>>> Unif_1d')
       
    if skip==None:
       skip=np.random.random_integers(0,1000)
@@ -34,7 +34,7 @@ def Gauss_1d (n, skip=None):
    '''
    global DEB
    if DEB==1:
-      print '>>>> Gauss_1d'
+      print ('>>>> Gauss_1d')
       
    if skip==None:
       skip=np.random.random_integers(0,1000)
@@ -48,7 +48,7 @@ def Gauss_1d_cut (n, cut, skip=None):
    '''
    global DEB
    if DEB==1:
-      print '>>>> Gauss_1d_cut'
+      print ('>>>> Gauss_1d_cut')
       
    out=np.zeros((n))
    needed = n
@@ -56,27 +56,27 @@ def Gauss_1d_cut (n, cut, skip=None):
    ind_f  = 0 
    while needed>0:
       if DEB==1: 
-          print '<-start', needed, ind_i
+          print ('<-start', needed, ind_i)
       gen    = Gauss_1d (needed, skip)
       keep   = np.where(np.abs(gen)<=cut)
       Ngood  = len(gen[keep])
       ind_f  = ind_i + Ngood
       if DEB==1: 
-         print '.. fill', Ngood, ind_i, ind_f
+         print ('.. fill', Ngood, ind_i, ind_f)
       if ind_f<=n: 
          if DEB==1: 
-            print 'ind_f<n'
+            print ('ind_f<n')
          out[ind_i:ind_f]=gen[keep]
       if ind_f>n:
          if DEB==1: 
-            print 'ind_f>n'
+            print ('ind_f>n')
          ind_f=n
-	 temp=gen[keep]
-	 out[ind_i:ind_f]=gen[keep[0:n-ind_i]]
-	 
+         temp=gen[keep]
+         out[ind_i:ind_f]=gen[keep[0:n-ind_i]]
+         
       needed = n-ind_f
       ind_i  = ind_f
-	 
+         
    return(out)
 
 def Unif_2d_cart (n, skip=None):
@@ -85,7 +85,7 @@ def Unif_2d_cart (n, skip=None):
    '''
    global DEB
    if DEB==1:
-      print '>>>> Unif_2d_cart'
+      print ('>>>> Unif_2d_cart')
       
    if skip==None:
       skip=np.random.random_integers(0,1000)
@@ -98,7 +98,7 @@ def Unif_3d_cart (n, skip=None):
    '''
    global DEB
    if DEB==1:
-      print '>>>> Unif_2d_cart'
+      print ('>>>> Unif_2d_cart')
       
    if skip==None:
       skip=np.random.random_integers(0,1000)
@@ -111,7 +111,7 @@ def Unif_5d (n, skip=None):
    '''
    global DEB
    if DEB==1:
-      print '>>>> Unif_2d_cart'
+      print ('>>>> Unif_2d_cart')
       
    if skip==None:
       skip=np.random.random_integers(0,1000)
@@ -125,7 +125,7 @@ def Gauss_2d_cart (n, corr, skip=None):
    '''
    global DEB
    if DEB==1:
-      print '>>>> Gauss_2d_cart'
+      print ('>>>> Gauss_2d_cart')
       
    U=Unif_2d_cart (n, skip)
    u=U[0,:]
@@ -142,7 +142,7 @@ def Unif_2d_rad (n, skip=None):
    '''
    global DEB
    if DEB==1:
-      print '>>>> Unif_2d_rad'
+      print ('>>>> Unif_2d_rad')
       
    U=Unif_2d_cart (n, skip)
    phi=U[0,:]*2*np.pi
@@ -158,7 +158,7 @@ def Unif_2d_ellipse (n, r1, r2, phi0, skip=None):
    '''
    global DEB
    if DEB==1:
-      print '>>>> Unif_2d_ellipse'
+      print ('>>>> Unif_2d_ellipse')
       
    U=Unif_2d_cart (n, skip)
    phi=U[0,:]*2*np.pi
@@ -180,7 +180,7 @@ def Gauss_2d_cart_cut (n, corr, cut):
    '''
    global DEB
    if DEB==1:
-      print '>>>> Gauss_2d_cart_cut'
+      print ('>>>> Gauss_2d_cart_cut')
       
    out=np.zeros((2,n))
    needed = n
@@ -188,7 +188,7 @@ def Gauss_2d_cart_cut (n, corr, cut):
    ind_f  = 0 
    while needed>0:
       if DEB==1: 
-          print '<-start', needed, ind_i
+          print ('<-start', needed, ind_i)
       gen    = Gauss_2d_cart (needed, corr)
       
       keep   = np.where((np.abs(gen[0,:])<=cut) & (np.abs(gen[1,:])<=cut))
@@ -196,23 +196,23 @@ def Gauss_2d_cart_cut (n, corr, cut):
       Ngood  = len(keep[0])
       ind_f  = ind_i + Ngood
       if DEB==1: 
-         print '.. fill', Ngood, ind_i, ind_f
+         print ('.. fill', Ngood, ind_i, ind_f)
       if ind_f<=n: 
          if DEB==1: 
-            print 'ind_f<n', keep
+            print ('ind_f<n', keep)
          out[0,ind_i:ind_f]=gen[0,keep]
-	 out[1,ind_i:ind_f]=gen[1,keep]
+         out[1,ind_i:ind_f]=gen[1,keep]
       if ind_f>n:
          if DEB==1: 
-            print 'ind_f>n'
+            print ('ind_f>n')
          ind_f=n
-	 temp=gen[keep]
-	 out[0, ind_i:ind_f]=gen[0, keep[0:n-ind_i]]
-	 out[1, ind_i:ind_f]=gen[1, keep[0:n-ind_i]]
-	 
+         temp=gen[keep]
+         out[0, ind_i:ind_f]=gen[0, keep[0:n-ind_i]]
+         out[1, ind_i:ind_f]=gen[1, keep[0:n-ind_i]]
+         
       needed = n-ind_f
       ind_i  = ind_f
-	 
+         
    return(out)
 
 def mc_1D (n,func,minOrd, maxOrd):
@@ -227,7 +227,7 @@ def mc_1D (n,func,minOrd, maxOrd):
    global DEB
 
    if DEB==1:
-      print '>>>> mc_1D'
+      print ('>>>> mc_1D')
       
    out=np.zeros((n))
    needed=n
@@ -235,7 +235,7 @@ def mc_1D (n,func,minOrd, maxOrd):
    ind_f  = 0 
    
    while needed>0:
-      print "needed=", needed
+      print ("needed=", needed)
       gen=Unif_2d_cart(needed)
       x=minOrd + gen[0,:]*(maxOrd-minOrd)
       y= gen[1,:]*1.2
@@ -243,20 +243,20 @@ def mc_1D (n,func,minOrd, maxOrd):
       Ngood  = len(keep[0])
       ind_f  = ind_i + Ngood
       if DEB==1: 
-         print '.. fill', Ngood, ind_i, ind_f
+         print ('.. fill', Ngood, ind_i, ind_f)
       if ind_f<=n: 
          if DEB==1: 
-            print 'ind_f<n', keep
+            print ('ind_f<n', keep)
          out[ind_i:ind_f]=x[keep]
       if ind_f>n:
          if DEB==1: 
-            print 'ind_f>n'
+            print ('ind_f>n')
          ind_f=n
-	 out[ind_i:ind_f]=x[keep[0:n-ind_i]]
-	 
+         out[ind_i:ind_f]=x[keep[0:n-ind_i]]
+         
       needed = n-ind_f
       ind_i  = ind_f
-	 
+         
    return(out)
       
    
@@ -298,7 +298,7 @@ def momt_thermal_iso (N, Ekin):
    # calculate the thermal momentum
    p = np.sqrt(Ekin**2+2*Ekin*m_ec2) 
    
-   print "total momentum", p 
+   print ("total momentum", p) 
 
    U=Unif_2d_cart (N)  
    u=U[0,:]
@@ -333,7 +333,7 @@ def momt_cold (N, Ekin):
    # calculate the thermal momentum
    p = np.sqrt(Ekin**2+2*Ekin*m_ec2) 
    
-   print "total momentum", p 
+   print ("total momentum", p) 
 
    U=Unif_2d_cart (N)  
    u=0*U[0,:]
@@ -355,7 +355,7 @@ def gaussian_phase_space(n, alpha, beta, emitgeom, cut):
      CS (alpha, beta) and emittance (emit) parameters. 
      cut: number of sigma for cut
    '''
-   sigma_x  = np.sqrt{beta*emitgeom)
+   sigma_x  = np.sqrt(beta*emitgeom)
    sigma_xp = emitgeom/sigma_x  # uncorrelated momentum spread
    corr     = - alpha/beta
    out=Gauss_2d_cart_cut (n, corr, cut)
@@ -404,12 +404,12 @@ def dump_ImpactT_cathode(X,Y,Z,PX,PY,PZ):
    bgzA    = np.mean (bgz)
 
 
-   print "Total Emission time [sec]  =", np.max(Z)-np.min(Z)
-   print "Mean gamma          [-]    =", np.mean(gamma)
-   print "Mean beta           [-]    =",np.mean(betaz)
-   print "Mean Kinetic Energy [eV]   =",MeanEk
-   print "Mean momentm        [eV/c] =",MeanP 
-   print "Sigma_z             [m]    =",SigmZ
+   print ("Total Emission time [sec]  =", np.max(Z)-np.min(Z))
+   print ("Mean gamma          [-]    =", np.mean(gamma))
+   print ("Mean beta           [-]    =",np.mean(betaz))
+   print ("Mean Kinetic Energy [eV]   =",MeanEk)
+   print ("Mean momentm        [eV/c] =",MeanP )
+   print ("Sigma_z             [m]    =",SigmZ)
    
    
    fid=open ('partcl.data','w')

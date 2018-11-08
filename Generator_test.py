@@ -17,7 +17,7 @@ f2d=1
 
 #X=  gt.Gauss_2d_cart(1000,0.5)
 X=  gt.Gauss_2d_cart_cut(100000,0.2,2.0)
-print np.shape(X)
+print(np.shape(X))
 
 
 if f2d==1: 

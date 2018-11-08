@@ -30,7 +30,7 @@ T   = gt.gauss_1d_cut  (N, sigma_t_laser, laser_sigma_cut)
 PX, PY, PZ = gt.momt_cold (N, Excess_kinetic_eV) 
 
 
-print len(X), len(Y), len(T), len(PX), len(PY), len(PZ)
+print(len(X), len(Y), len(T), len(PX), len(PY), len(PZ))
 
 
 gt.dump_ImpactT_cathode(X,Y,T,PX,PY,PZ)

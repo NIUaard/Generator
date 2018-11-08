@@ -29,16 +29,16 @@ ind=0
 
 for i in range(beamlet_size):
    for j in range(beamlet_size):
-       print "beamlet #", ind
+       print(("beamlet #", ind))
        xcurrent=(-(beamlet_size-1)/2.+i)*beamlet_pitch 
        ycurrent=(-(beamlet_size-1)/2.+j)*beamlet_pitch 
-       print xcurrent, ycurrent
+       print((xcurrent, ycurrent))
        Xtmp, Ytmp= gt.tran_rad_unif (Nb, cathode_spot_radius)
        Xtmp=Xtmp+xcurrent
        Ytmp=Ytmp+ycurrent
        if ind==0:
            X=Xtmp
-	   Y=Ytmp
+           Y=Ytmp
        else:
            X=np.append(X,Xtmp) 
            Y=np.append(Y,Ytmp) 
@@ -50,7 +50,7 @@ T   = gt.gauss_1d_cut  (N, sigma_t_laser, laser_sigma_cut)
 PX, PY, PZ = gt.momt_cold (N, Excess_kinetic_eV) 
 
 
-print len(X), len(Y), len(T), len(PX), len(PY), len(PZ)
+print((len(X), len(Y), len(T), len(PX), len(PY), len(PZ)))
 
 
 gt.dump_ImpactT_cathode(X,Y,T,PX,PY,PZ)
