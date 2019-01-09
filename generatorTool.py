@@ -355,7 +355,7 @@ def gaussian_phase_space(n, alpha, beta, emitgeom, cut):
      CS (alpha, beta) and emittance (emit) parameters. 
      cut: number of sigma for cut
    '''
-   sigma_x  = np.sqrt{beta*emitgeom)
+   sigma_x  = np.sqrt(beta*emitgeom)
    sigma_xp = emitgeom/sigma_x  # uncorrelated momentum spread
    corr     = - alpha/beta
    out=Gauss_2d_cart_cut (n, corr, cut)
