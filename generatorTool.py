@@ -462,3 +462,46 @@ def dump_Elegant(X,Y,Z,PX,PY,PZ):
 
    f.close()
 
+   
+def dump_Astra_cathode(X,Y,Z,PX,PY,PZ):
+
+   '''
+    expect X[m], Y[m]. Z[sec]. PX[eV/c], PY[eV/c], PZ[eV/c]
+   '''
+
+   global m_ec2
+   global cms
+
+   N       = len(X)
+   Qbunch=1e-9 # can be adjusted within the astra deck 
+   Qmac=Qbunch/(N+1)*1e9 # in nC
+   TotalEmissionTimeSec = np.abs(np.max(Z)-np.min(Z))
+
+   #  in impact-T all the particle shoud start with z<0)
+   aux     = 0.00
+#   cdt     = cms*IntegStep
+   # THIS is just to check Ek is the proper value
+   MeanPz  = np.mean(PZ)
+   MeanP   = np.mean (np.sqrt(PX**2+PY**2+PZ**2))
+   MeanEk  = np.sqrt(MeanP**2 + m_ec2**2) -m_ec2
+   zMean   = 0.0 # at cathode
+
+   print ("Total Emission time [sec]  =", np.max(Z)-np.min(Z))
+   print ("Mean Kinetic Energy [eV]   =",MeanEk)
+   print ("Mean momentm        [eV/c] =",MeanP )
+   
+   
+   fid=open ('particle.ini','w')
+
+
+   fid.write('{:13.5e}'.format(aux)+'{:13.5e}'.format(aux)+'{:13.5e}'.format(aux)+  \
+            '{:13.5e}'.format(aux)+'{:13.5e}'.format(aux)+'{:13.5e}'.format(MeanPz)+ \
+            '{:13.5e}'.format(aux)+'{:13.5e}'.format(Qmac)+'{:5d}'.format(1)+ \
+            '{:5d}'.format(-1)+'\n')
+   for i in range(N):
+        fid.write('{:13.5e}'.format(X[i])+'{:13.5e}'.format(Y[i])+'{:13.5e}'.format(0.00)+  \
+            '{:13.5e}'.format(PX[i])+'{:13.5e}'.format(PY[i])+'{:13.5e}'.format(PZ[i])+ \
+            '{:13.5e}'.format(Z[i]*1e9)+'{:13.5e}'.format(Qmac)+'{:5d}'.format(1)+ \
+            '{:5d}'.format(-1)+'\n')
+
+   fid.close()
