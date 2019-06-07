@@ -11,7 +11,7 @@ created AUG-27-2017 P. Piot, NIU
 '''
 m_ec2 = 0.5109e6
 cms   = 299792458.
-DEB = 1
+DEB = 0
 ############### elementary generating functions #############################
 
 def Unif_1d (n, skip=None):
@@ -94,7 +94,7 @@ def Unif_2d_cart (n, skip=None):
    
 def Unif_3d_cart (n, skip=None):
    '''
-   generates a uniform distribution in 2D within [0,1] 
+   generates a uniform distribution in 3D within [0,1] 
    '''
    global DEB
    if DEB==1:
@@ -105,13 +105,13 @@ def Unif_3d_cart (n, skip=None):
    out=sob.i4_sobol_generate (3,n,skip)
    return(out)
    
-def Unif_5d (n, skip=None):
+def Unif_5d_cart (n, skip=None):
    '''
    generates a uniform distribution in 5D within [0,1] 
    '''
    global DEB
    if DEB==1:
-      print ('>>>> Unif_2d_cart')
+      print ('>>>> Unif_5d_cart')
       
    if skip==None:
       skip=np.random.random_integers(0,1000)
@@ -133,6 +133,31 @@ def Gauss_2d_cart (n, corr, skip=None):
    out=np.zeros((2,n))
    out[0,:]=np.sqrt(-2*np.log(u))*(np.sqrt(1-corr**2)*np.cos(2*np.pi*v)+corr*np.sin(2*np.pi*v))
    out[1,:]=np.sqrt(-2*np.log(u))*np.sin(2*np.pi*v)
+   return(out)
+
+   
+def Gauss_4d_cart (n, corr01, corr23, skip=None):
+   '''
+   generates a 2D Gaussian distribution in x, y sigmas=1 in both directions
+   the distribution with correlation corr
+   corr01: correlation between columns 0 and 1 
+   corr23: correlation between columns 2 and 3 
+   '''
+   global DEB
+   if DEB==1:
+      print ('>>>> Gauss_4d_cart')
+      
+   U=Unif_5d_cart (n, skip)
+   u=U[0,:]
+   v=U[1,:]
+   out=np.zeros((4,n))
+   out[0,:]=np.sqrt(-2*np.log(u))*(np.sqrt(1-corr01**2)*np.cos(2*np.pi*v)+corr01*np.sin(2*np.pi*v))
+   out[1,:]=np.sqrt(-2*np.log(u))*np.sin(2*np.pi*v)
+#
+   u=U[2,:]
+   v=U[3,:]
+   out[2,:]=np.sqrt(-2*np.log(u))*(np.sqrt(1-corr23**2)*np.cos(2*np.pi*v)+corr23*np.sin(2*np.pi*v))
+   out[3,:]=np.sqrt(-2*np.log(u))*np.sin(2*np.pi*v)
    return(out)
 
    
@@ -215,6 +240,55 @@ def Gauss_2d_cart_cut (n, corr, cut):
          
    return(out)
 
+def Gauss_4d_cart_cut (n, corr01, corr23, cut):
+   '''
+   generate a 4D Gaussian distribution in with a sigma of 1 and cut in sigma unit
+   the cut applies in both directions
+   corr01: correlation between columns 0 and 1 
+   corr23: correlation between columns 2 and 3 
+   '''
+   global DEB
+   if DEB==1:
+      print ('>>>> Gauss_4d_cart_cut')
+      
+   out=np.zeros((4,n))
+   needed = n
+   ind_i  = 0 
+   ind_f  = 0 
+   while needed>0:
+      if DEB==1: 
+          print ('<-start', needed, ind_i)
+      gen    = Gauss_4d_cart (needed, corr01, corr23)
+      
+      keep   = np.where((np.abs(gen[0,:])<=cut) & (np.abs(gen[1,:])<=cut) & \
+                        (np.abs(gen[2,:])<=cut) & (np.abs(gen[3,:])<=cut))
+
+      Ngood  = len(keep[0])
+      ind_f  = ind_i + Ngood
+      if DEB==1: 
+         print ('.. fill', Ngood, ind_i, ind_f)
+      if ind_f<=n: 
+         if DEB==1: 
+            print ('ind_f<n', keep)
+         out[0,ind_i:ind_f]=gen[0,keep]
+         out[1,ind_i:ind_f]=gen[1,keep]
+         out[2,ind_i:ind_f]=gen[2,keep]
+         out[3,ind_i:ind_f]=gen[3,keep]
+      if ind_f>n:
+         if DEB==1: 
+            print ('ind_f>n')
+         ind_f=n
+         temp=gen[keep]
+         out[0, ind_i:ind_f]=gen[0, keep[0:n-ind_i]]
+         out[1, ind_i:ind_f]=gen[1, keep[0:n-ind_i]]
+         out[2, ind_i:ind_f]=gen[2, keep[0:n-ind_i]]
+         out[3, ind_i:ind_f]=gen[3, keep[0:n-ind_i]]
+         
+      needed = n-ind_f
+      ind_i  = ind_f
+         
+   return(out)
+
 def mc_1D (n,func,minOrd, maxOrd):
    '''
    generate a distribution via a Monte-Carlo rejection 
@@ -235,7 +309,8 @@ def mc_1D (n,func,minOrd, maxOrd):
    ind_f  = 0 
    
    while needed>0:
-      print ("needed=", needed)
+      if DEB==1:
+         print ("needed=", needed)
       gen=Unif_2d_cart(needed)
       x=minOrd + gen[0,:]*(maxOrd-minOrd)
       y= gen[1,:]*1.2
@@ -275,7 +350,7 @@ def tran_rad_unif (N, Rad):
    return (T[0,:], T[1,:])
 
 
-def gauss_1d_cut (N, Sigma, Cut):
+def gauss_1d_cut (N, Sigma, Cut=4):
    '''
    generates a 1-d Gaussian distribution
    - N:      number of macroparticles  
@@ -349,20 +424,46 @@ def momt_cold (N, Ekin):
    return (PX, PY, PZ)
    
 
-def gaussian_phase_space(n, alpha, beta, emitgeom, cut):   
+def gaussian_phase_space_1dof(n, alpha, beta, emitgeom, cut):   
    '''
      generate a Gaussian phase space (x,x')with given 
      CS (alpha, beta) and emittance (emit) parameters. 
      cut: number of sigma for cut
    '''
    sigma_x  = np.sqrt(beta*emitgeom)
-   sigma_xp = emitgeom/sigma_x  # uncorrelated momentum spread
-   corr     = - alpha/beta
+   gamma=(1+alpha**2)/beta
+   sigma_xp = np.sqrt(emitgeom*gamma)  # uncorrelated momentum spread
+   corr     = - alpha/np.sqrt(1+alpha**2)
    out=Gauss_2d_cart_cut (n, corr, cut)
    out[0,:]=out[0,:]*sigma_x
    out[1,:]=out[1,:]*sigma_xp
    return(out[0,:], out[1,:])
    
+
+def gaussian_phase_space_2dof(n, alphax, betax, emitgeomx,\
+                                    alphay, betay, emitgeomy, cut):   
+   '''
+     generate a Gaussian phase space (x,x',y,y')with given 
+     CS (alpha, beta) and emittance (emit) parameters. 
+     cut: number of sigma for cut
+   '''
+   sigma_x  = np.sqrt(betax*emitgeomx)
+   gammax   = (1+alphax**2)/betax
+   sigma_xp = np.sqrt(emitgeomx*gammax)  # uncorrelated momentum spread
+   corrx    = - alphax/np.sqrt(1+alphax**2)
+   sigma_y  = np.sqrt(betay*emitgeomy)
+   gammay   = (1+alphay**2)/betay
+   sigma_yp = np.sqrt(emitgeomy*gammay)  # uncorrelated momentum spread
+   corry    = - alphay/np.sqrt(1+alphay**2)
+   out=Gauss_4d_cart_cut (n, corrx, corry, cut)
+   out[0,:]=out[0,:]*sigma_x
+   out[1,:]=out[1,:]*sigma_xp
+   out[2,:]=out[2,:]*sigma_y
+   out[3,:]=out[3,:]*sigma_yp
+   return(out[0,:], out[1,:], out[2,:], out[3,:])
+   
+
+
 
 ############### dumping of particle distribution in files #############################
 
@@ -505,3 +606,40 @@ def dump_Astra_cathode(X,Y,Z,PX,PY,PZ):
             '{:5d}'.format(-1)+'\n')
 
    fid.close()
+
+def diagnostics_CS(X,XP):
+   sx   = np.std(X)
+   sxp  = np.std(XP)
+   Cxxp = np.mean((X-np.mean(X))*(XP-np.mean(XP)))
+   emitx= np.sqrt(sx**2*sxp**2-Cxxp**2)
+   beta = sx**2/emitx
+   alpha= -Cxxp/emitx
+   return(sx, sxp, emitx, beta, alpha)   
+
+def diagnostics_stat(X,Y,T,PX,PY,PZ):
+   
+   
+   print ('---------statistics ---------------')
+   XP=PX/PZ
+   YP=PY/PZ
+   
+   print ('x parameters:')
+   sx, sxp, emitx, betax, alphax = diagnostics_CS(X,XP)
+   print ('sigma_x' , sx)
+   print ('sigma_xp', sxp)
+   print ('emit_x'  , emitx)
+   print ('beta_x'  , betax)
+   print ('alpha_x' , alphax)
+   
+   print ('y parameters:')
+   sy, syp, emity, betay, alphay = diagnostics_CS(Y,YP)
+   print ('sigma_y' , sy)
+   print ('sigma_yp', syp)
+   print ('emit_y'  , emity)
+   print ('beta_y'  , betay)
+   print ('alpha_y' , alphay)
+   
+   print ('t parameters:')
+   print ('sigma_t,z' , np.std(T))
+   print ('sigma_pz' , np.std(PZ))
+   
