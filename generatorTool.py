@@ -379,8 +379,8 @@ def momt_thermal_iso (N, Ekin):
    u=U[0,:]
    v=U[1,:]
 
-   the =2.*np.pi*u 
-   phi = -np.pi/2+np.pi*v
+   the = 10*np.pi*u 
+   phi = -np.pi/2+np.pi*v 
 #   costhe=(u-0.5)*2.
 #   sinthe=np.sqrt(1-costhe**2)
 #   sinphi=-v
@@ -395,7 +395,9 @@ def momt_thermal_iso (N, Ekin):
     
    return (PX, PY, PZ)
    
+      
    
+
 def momt_cold (N, Ekin):
    '''
    generates an isotropic momentum distributions:
