@@ -105,6 +105,19 @@ def Unif_3d_cart (n, skip=None):
    out=sob.i4_sobol_generate (3,n,skip)
    return(out)
    
+def Unif_4d_cart (n, skip=None):
+   '''
+   generates a uniform distribution in 3D within [0,1] 
+   '''
+   global DEB
+   if DEB==1:
+      print ('>>>> Unif_4d_cart')
+      
+   if skip==None:
+      skip=np.random.random_integers(0,1000)
+   out=sob.i4_sobol_generate (4,n,skip)
+   return(out)
+   
 def Unif_5d_cart (n, skip=None):
    '''
    generates a uniform distribution in 5D within [0,1] 
@@ -115,7 +128,7 @@ def Unif_5d_cart (n, skip=None):
       
    if skip==None:
       skip=np.random.random_integers(0,1000)
-   out=sob.i4_sobol_generate (4,n,skip)
+   out=sob.i4_sobol_generate (5,n,skip)
    return(out)
    
 def Gauss_2d_cart (n, corr, skip=None):
@@ -362,7 +375,7 @@ def gauss_1d_cut (N, Sigma, Cut=4):
    return (X*Sigma)
 
 
-def momt_thermal_iso (N, Ekin):
+def momt_thermal_iso_old (N, Ekin):
    '''
    generates an isotropic momentum distributions:
    - N:   number of macroparticles  
@@ -396,7 +409,36 @@ def momt_thermal_iso (N, Ekin):
    return (PX, PY, PZ)
    
       
+def momt_thermal_iso (N, Ekin):
+   '''
+   generates an isotropic momentum distributions:
+   - N:   number of macroparticles  
+   - Ekin: excess in kinetic energy (Ekin~h\nu-Phi), 
+   '''
+   global m_ec2
+   global cms
+   # calculate the thermal momentum
+   p = np.sqrt(Ekin**2+2*Ekin*m_ec2) 
    
+   print ("total momentum", p) 
+
+   U=Unif_4d_cart (N)  
+   t=U[2,:]
+   u=U[3,:]
+   v=U[0,:]
+   w=U[1,:]
+
+   phi = 2*np.pi*t
+   the = np.arccos(u) 
+#   the = np.pi/2*u  non isotopic
+   PX = p*np.sin(the)*np.cos(phi)
+   PY = p*np.sin(the)*np.sin(phi)
+   PZ = p*np.cos(the) 
+    
+   return (PX, PY, PZ)
+   
+      
+
 
 def momt_cold (N, Ekin):
    '''
