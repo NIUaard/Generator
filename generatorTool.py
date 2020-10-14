@@ -7,6 +7,7 @@ import sobol_lib as sob
 Set of generic function for generating particle distributions for tracking code
 created AUG-27-2017 P. Piot, NIU
 - random generators are all based on Sobol pseudo-random generator
+- added hollow distribution PP, 10-14-2020
 
 '''
 m_ec2 = 0.5109e6
@@ -190,6 +191,22 @@ def Unif_2d_rad (n, skip=None):
    out[1,:]=np.sqrt(rad)*np.sin(phi)
    return(out)
    
+def Unif_2d_hollow (n, r1, r2, skip=None):
+   '''
+   generate a uniform distribution between r in [r1,r2] and phi in [0, 2pi]
+   '''
+   global DEB
+   if DEB==1:
+      print ('>>>> Unif_2d_rad')
+      
+   U=Unif_2d_cart (n, skip)
+   phi=U[0,:]*2*np.pi
+   rad=U[1,:]*(r2-r1)+r1
+   out=np.zeros((2,len(phi)))
+   out[0,:]=np.sqrt(rad)*np.cos(phi)
+   out[1,:]=np.sqrt(rad)*np.sin(phi)
+   return(out)
+   
 def Unif_2d_ellipse (n, r1, r2, phi0, skip=None):
    '''
    generate a uniform distribution between r in [0,1] and phi in [0, 2pi]
@@ -362,6 +379,15 @@ def tran_rad_unif (N, Rad):
    T=Rad*Unif_2d_rad(N)
    return (T[0,:], T[1,:])
 
+def tran_hollow_unif (N, Rin, Rout): 
+   '''
+   generates a hollow radial distribution in (x,y)
+   - N:   number of macroparticles  
+   - Rin: inner radius
+   - Rout: outer radius  
+   '''
+   T= Unif_2d_hollow (n, Rin, Rout)
+   return(T[0,:], T[1,:])
 
 def gauss_1d_cut (N, Sigma, Cut=4):
    '''
