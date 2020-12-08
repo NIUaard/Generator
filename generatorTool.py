@@ -203,8 +203,8 @@ def Unif_2d_hollow (n, r1, r2, skip=None):
    phi=U[0,:]*2*np.pi
    rad=U[1,:]*(r2-r1)+r1
    out=np.zeros((2,len(phi)))
-   out[0,:]=np.sqrt(rad)*np.cos(phi)
-   out[1,:]=np.sqrt(rad)*np.sin(phi)
+   out[0,:]=rad*np.cos(phi)
+   out[1,:]=rad*np.sin(phi)
    return(out)
    
 def Unif_2d_ellipse (n, r1, r2, phi0, skip=None):
@@ -386,7 +386,7 @@ def tran_hollow_unif (N, Rin, Rout):
    - Rin: inner radius
    - Rout: outer radius  
    '''
-   T= Unif_2d_hollow (n, Rin, Rout)
+   T= Unif_2d_hollow (N, Rin, Rout)
    return(T[0,:], T[1,:])
 
 def gauss_1d_cut (N, Sigma, Cut=4):
