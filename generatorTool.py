@@ -227,6 +227,26 @@ def Unif_2d_ellipse (n, r1, r2, phi0, skip=None):
    out[0,:] =  outt[0,:]*np.cos(phi0) + outt[1,:]*np.sin(phi0)
    out[1,:] = -outt[0,:]*np.sin(phi0) + outt[1,:]*np.cos(phi0)
    return(out)
+
+def Unif_3d_ellipsoid (n, a, b, c, skip=None):
+    '''
+    Unif_3d_ellipsoid (n, a, b, c, skip=None)
+    generate a uniform distribution in an ellipsod
+    transformation from https://mathworld.wolfram.com/SpherePointPicking.html
+    '''
+    global DEB
+    if DEB==1:
+        print ('>>>> Unif_3d_ellipsoid')
+   
+    U=Unif_3d_cart(n, skip)
+    theta = 2 * np.pi * U[0,:]
+    phi = np.arccos(2 * U[1,:] - 1)
+    rad = np.cbrt(U[2,:])
+    out = np.zeros((3,len(phi)))
+    out[0,:] = rad * np.cos(theta) * np.sin(phi)  * a
+    out[1,:] = rad * np.sin(theta) * np.sin(phi)  * b
+    out[2,:] = rad * np.cos(phi) * c
+    return(out)
    
 def Gauss_2d_cart_cut (n, corr, cut):
    '''
@@ -460,6 +480,9 @@ def momt_thermal_iso (N, Ekin):
    PX = p*np.sin(the)*np.cos(phi)
    PY = p*np.sin(the)*np.sin(phi)
    PZ = p*np.cos(the) 
+   print ("mean z momentum", np.mean(PZ)) 
+   print ("rms x momentum", np.std(PX)) 
+   print ("rms y momentum", np.std(PY)) 
     
    return (PX, PY, PZ)
    
