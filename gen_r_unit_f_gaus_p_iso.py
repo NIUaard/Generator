@@ -41,7 +41,7 @@ if (plot_it==1):
    plt.plot (X,Y,'.')
 
    plt.subplot (2,2,2)
-   plt.hist(T, 101, normed=1, lw=3, edgecolor='red', facecolor="None")
+   plt.hist(T, 101, density=True, lw=3, edgecolor='red', facecolor="None")
 
    plt.subplot (2,2,3)
 #   plt.plot (PX,PY,'.')

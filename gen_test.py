@@ -26,14 +26,14 @@ if f2d==1:
 #   plt.ylim(-0.5,0.5)
 #   plt.xlim(-0.5,0.5)
    plt.subplot (2,2,2)
-   plt.hist(X[0,:], 101, normed=1, lw=3, edgecolor='red', facecolor="None")
+   plt.hist(X[0,:], 101, density=True, lw=3, edgecolor='red', facecolor="None")
    plt.subplot (2,2,3)
-   plt.hist(X[1,:], 101, normed=1, lw=3, edgecolor='red', facecolor="None")
+   plt.hist(X[1,:], 101, density=True, lw=3, edgecolor='red', facecolor="None")
 else:
    plt.subplot (2,1,1)
    plt.plot (X,'.')
    plt.subplot (2,1,2)
-   plt.hist(X, 101, normed=1, lw=3, edgecolor='red', facecolor="None")
+   plt.hist(X, 101, density=True, lw=3, edgecolor='red', facecolor="None")
    
 
 
