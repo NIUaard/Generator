@@ -2,7 +2,8 @@ import numpy as np
 import numpy.random as rd 
 import matplotlib.pyplot as plt
 import sobol_lib as sob 
-
+import math 
+import time 
 ''''
 Set of generic function for generating particle distributions for tracking code
 created AUG-27-2017 P. Piot, NIU
@@ -248,6 +249,26 @@ def Unif_3d_ellipsoid (n, a, b, c, skip=None):
     out[2,:] = rad * np.cos(phi) * c
     return(out)
    
+def Unif_3d_super_ellipsoid (n, a, b, c, na, nb, nc, skip=None):
+    '''
+    Unif_3d_ellipsoid (n, a, b, c, skip=None)
+    generate a uniform distribution in an ellipsod
+    transformation from https://mathworld.wolfram.com/SpherePointPicking.html
+    '''
+    global DEB
+    if DEB==1:
+        print ('>>>> Unif_3d_ellipsoid')
+   
+    U=Unif_3d_cart(n, skip)
+    theta = 2 * np.pi * U[0,:]
+    phi = np.arccos(2 * U[1,:] - 1)
+    rad = 1 # np.cbrt(U[2,:])
+    out = np.zeros((3,len(phi)))
+    out[0,:] = rad * a * np.abs(np.cos(theta) * np.sin(phi))**(2./na)*np.sign(np.cos(theta) * np.sin(phi))
+    out[1,:] = rad * b * np.abs(np.sin(theta) * np.sin(phi))**(2./nb)*np.sign(np.sin(theta) * np.sin(phi))
+    out[2,:] = rad * c * np.abs(np.cos(phi))**(2./nc)*np.sign(np.cos(phi))
+    return(out)
+   
 def Gauss_2d_cart_cut (n, corr, cut):
    '''
    generate a 2D Gaussian distribution in with a sigma of 1 and cut in sigma unit
@@ -384,9 +405,68 @@ def mc_1D (n,func,minOrd, maxOrd):
          
    return(out)
       
+      
+def mc_3D (n,func):
+   '''
+   generate a distribution via a Monte-Carlo rejection 
+   with density function given by func peak normalized to one 
+   we assume max(func)=1
+   - n number of macroparticles 
+   - func is the function define over [minOrd, maxOrd] note that maxOrd>minOrd
+   '''
+
+   global DEB
+
+   if DEB==1:
+      print ('>>>> mc_3D')
+      
+   out=np.zeros((3,n))
+   needed=n
+   ind_i  = 0 
+   ind_f  = 0 
    
-   
-   
+   while needed>0:
+      if DEB==1:
+         print ("needed=", needed)
+         print ("shape out=", np.shape(out))
+      gen=Unif_4d_cart(needed)
+      gen[:-1,:] = (gen[:-1,:]-0.5)*2.2 #ensures -1.1<(x,y,z)<1.1 
+      gen[3,:]   = gen[3,:]*1.1          #ensures  0<gen[4]<1.1 for MC rejection
+      x= gen[0,:]
+      y= gen[1,:]
+      z= gen[2,:]
+      if DEB==1:
+         print(np.shape(gen[:-1,:]))
+         print ("funtion=", func(gen[:-1,:]))
+         print (">>>>> gen", gen[:-1,:])  # gen)
+#         time.sleep(1)
+      keep   = np.where(func(gen[:-1,:])<gen[3,:])
+         
+      Ngood  = len(keep[0])
+      ind_f  = ind_i + Ngood
+      if DEB==1: 
+         print ('... fill', Ngood, ind_i, ind_f)
+      if ind_f<=n: 
+         if DEB==1: 
+            print ('ind_f<n', keep)
+         out[:,ind_i:ind_f]=gen[:-1,keep].reshape(3,Ngood)
+      if ind_f>n:
+         if DEB==1: 
+            print ('ind_f>n')
+         ind_f=n
+         out[:,ind_i:ind_f]=gen[:-1,0:n-ind_i].reshape(3,Ngood)
+      if DEB==1:
+         print(np.shape(out))
+         print (">>>>> out", out)  # gen)
+#         time.sleep(10)
+         
+      needed = n-ind_f
+      ind_i  = ind_f
+         
+   return(out)
+      
+      
+
 ############### real-space generating functions #############################
 
 def tran_rad_unif (N, Rad):
