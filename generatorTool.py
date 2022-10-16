@@ -649,7 +649,7 @@ def dump_ImpactT_cathode(X,Y,T,PX,PY,PZ, fname='partcl.data'):
    global m_ec2
    global cms
 
-   TotalEmissionTimeSec = np.abs(np.max(Z)-np.min(Z))
+   TotalEmissionTimeSec = np.abs(np.max(T)-np.min(T))
 
    N       = len(X)
    #  in impact-T all the particle shoud start with z<0)
@@ -669,10 +669,11 @@ def dump_ImpactT_cathode(X,Y,T,PX,PY,PZ, fname='partcl.data'):
    betaz = bg/gamma
    Z = (T-np.max(T))*cms*np.mean(betaz)+1e-16
    zMean = np.mean(Z)
+   SigmZ = np.std(Z)
    bgzMean    = np.mean(bgz)
 
 
-   print ("Total Emission time [sec]  =", np.max(Z)-np.min(Z))
+   print ("Total Emission time [sec]  =", TotalEmissionTimeSec)
    print ("Mean gamma          [-]    =", np.mean(gamma))
    print ("Mean beta           [-]    =",np.mean(betaz))
    print ("Mean Kinetic Energy [eV]   =",MeanEk)
@@ -680,9 +681,8 @@ def dump_ImpactT_cathode(X,Y,T,PX,PY,PZ, fname='partcl.data'):
    print ("Sigma_z             [m]    =",SigmZ)
    
    
-   fid=open (fname,'w')
 
-   with open("partcl.data", "w") as fid:
+   with open(fname, "w") as fid:
        fid.write (str(N+1)+'\n')
 
        fid.write('{:19.12e}'.format(aux)+'{:19.12e}'.format(aux)+'{:19.12e}'.format(aux)+  \
