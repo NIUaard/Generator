@@ -640,10 +640,10 @@ def gaussian_phase_space_2dof(n, alphax, betax, emitgeomx,\
 
 ############### dumping of particle distribution in files #############################
 
-def dump_ImpactT_cathode(X,Y,Z,PX,PY,PZ):
+def dump_ImpactT_cathode(X,Y,T,PX,PY,PZ, fname='partcl.data'):
 
    '''
-    expect X[m], Y[m]. Z[sec]. PX[eV/c], PY[eV/c], PZ[eV/c]
+    expect X[m], Y[m]. T[sec]. PX[eV/c], PY[eV/c], PZ[eV/c]
    '''
 
    global m_ec2
@@ -666,16 +666,10 @@ def dump_ImpactT_cathode(X,Y,Z,PX,PY,PZ):
    bg    = np.sqrt (bgx**2 + bgy**2 + bgz**2)
 
    gamma = np.sqrt (bg**2+1.) 
-#PP need to check the two line below when thermal emittance 
-# is included sigmat was changing if I use betaz   
-   betaz    = bg/gamma
-# this was original choice   
-#   betaz   = bgz/(gamma)
-   Z2      = (Z-max(Z))*cms*np.mean(betaz)+1e-16;
-   zMean   = np.mean(Z2)
-#   Phi     = ( mean(Z-max(Z))-1e-16)*cms/((cms)/1.3e9*1.0/360.00)
-   SigmZ   = np.std(Z2)
-   bgzA    = np.mean (bgz)
+   betaz = bg/gamma
+   Z = (T-np.max(T))*cms*np.mean(betaz)+1e-16
+   zMean = np.mean(Z)
+   bgzMean    = np.mean(bgz)
 
 
    print ("Total Emission time [sec]  =", np.max(Z)-np.min(Z))
@@ -686,20 +680,22 @@ def dump_ImpactT_cathode(X,Y,Z,PX,PY,PZ):
    print ("Sigma_z             [m]    =",SigmZ)
    
    
-   fid=open ('partcl.data','w')
+   fid=open (fname,'w')
 
-   fid.write (str(N+1)+'\n')
+   with open("partcl.data", "w") as fid:
+       fid.write (str(N+1)+'\n')
 
-   fid.write('{:13.5e}'.format(aux)+'{:13.5e}'.format(aux)+'{:13.5e}'.format(aux)+  \
-             '{:13.5e}'.format(aux)+'{:13.5e}'.format(zMean)+'{:13.5e}'.format(bgzA)+'\n')
-   for i in range(N):
-        fid.write('{:13.5e}'.format(X[i])+'{:13.5e}'.format(bgx[i])+'{:13.5e}'.format(Y[i])+  \
-            '{:13.5e}'.format(bgy[i])+'{:13.5e}'.format(Z2[i])+'{:13.5e}'.format(bgz[i])+'\n')
-
+       fid.write('{:19.12e}'.format(aux)+'{:19.12e}'.format(aux)+'{:19.12e}'.format(aux)+  \
+                 '{:19.12e}'.format(aux)+'{:19.12e}'.format(zMean)+'{:19.12e}'.format(bgzMean)+'\n')
+       for i in range(N):
+           fid.write('{:19.12e}'.format(X[i])+'{:19.12e}'.format(bgx[i])+'{:19.12e}'.format(Y[i])+  \
+               '{:19.12e}'.format(bgy[i])+'{:19.12e}'.format(Z[i])+'{:19.12e}'.format(bgz[i])+'\n')
+		
+		
    fid.close()
    
    
-def dump_Elegant(X,Y,Z,PX,PY,PZ):
+def dump_Elegant(X,Y,Z,PX,PY,PZ, fname='bunch.sdds'):
 
    '''
     expect X[m], Y[m]. Z[sec]. PX[eV/c], PY[eV/c], PZ[eV/c]
@@ -711,7 +707,7 @@ def dump_Elegant(X,Y,Z,PX,PY,PZ):
 
    N=len(X)
    
-   f = open('bunch.sdds', 'w')
+   f = open(fname, 'w')
    f.write ("SDDS1\n")
    f.write ("&column name=x, units=m,   type=double, &end  \n")
    f.write ("&column name=y, units=m,    type=double, &end  \n")
@@ -737,7 +733,7 @@ def dump_Elegant(X,Y,Z,PX,PY,PZ):
    f.close()
 
    
-def dump_Astra_cathode(X,Y,Z,PX,PY,PZ):
+def dump_Astra_cathode(X,Y,Z,PX,PY,PZ, fname='particle.ini'):
 
    '''
     expect X[m], Y[m]. Z[sec]. PX[eV/c], PY[eV/c], PZ[eV/c]
@@ -765,7 +761,7 @@ def dump_Astra_cathode(X,Y,Z,PX,PY,PZ):
    print ("Mean momentm        [eV/c] =",MeanP )
    
    
-   fid=open ('particle.ini','w')
+   fid=open (fname,'w')
 
 
    fid.write('{:13.5e}'.format(aux)+'{:13.5e}'.format(aux)+'{:13.5e}'.format(aux)+  \
