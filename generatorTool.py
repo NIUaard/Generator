@@ -406,7 +406,7 @@ def mc_1D (n,func,minOrd, maxOrd):
    return(out)
       
       
-def mc_3D (n,func):
+def mc_3DBoundary (n,func):
    '''
    generate a distribution via a Monte-Carlo rejection 
    with density function given by func peak normalized to one 
@@ -431,10 +431,10 @@ def mc_3D (n,func):
          print ("shape out=", np.shape(out))
       gen=Unif_4d_cart(needed)
       gen[:-1,:] = (gen[:-1,:]-0.5)*2.2 #ensures -1.1<(x,y,z)<1.1 
-      gen[3,:]   = gen[3,:]*1.1          #ensures  0<gen[4]<1.1 for MC rejection
       x= gen[0,:]
       y= gen[1,:]
       z= gen[2,:]
+      gen[3,:] = np.ones(len(x))
       if DEB==1:
          print(np.shape(gen[:-1,:]))
          print ("funtion=", func(gen[:-1,:]))
@@ -640,16 +640,16 @@ def gaussian_phase_space_2dof(n, alphax, betax, emitgeomx,\
 
 ############### dumping of particle distribution in files #############################
 
-def dump_ImpactT_cathode(X,Y,T,PX,PY,PZ, fname='partcl.data'):
+def dump_ImpactT_cathode(X,Y,Z,PX,PY,PZ, fname='partcl.data'):
 
    '''
-    expect X[m], Y[m]. T[sec]. PX[eV/c], PY[eV/c], PZ[eV/c]
+    expect X[m], Y[m]. Z[sec]. PX[eV/c], PY[eV/c], PZ[eV/c]
    '''
 
    global m_ec2
    global cms
 
-   TotalEmissionTimeSec = np.abs(np.max(T)-np.min(T))
+   TotalEmissionTimeSec = np.abs(np.max(Z)-np.min(Z))
 
    N       = len(X)
    #  in impact-T all the particle shoud start with z<0)
@@ -666,14 +666,19 @@ def dump_ImpactT_cathode(X,Y,T,PX,PY,PZ, fname='partcl.data'):
    bg    = np.sqrt (bgx**2 + bgy**2 + bgz**2)
 
    gamma = np.sqrt (bg**2+1.) 
-   betaz = bg/gamma
-   Z = (T-np.max(T))*cms*np.mean(betaz)+1e-16
-   zMean = np.mean(Z)
-   SigmZ = np.std(Z)
-   bgzMean    = np.mean(bgz)
+#PP need to check the two line below when thermal emittance 
+# is included sigmat was changing if I use betaz   
+   betaz    = bg/gamma
+# this was original choice   
+#   betaz   = bgz/(gamma)
+   Z2      = (Z-max(Z))*cms*np.mean(betaz)+1e-16;
+   zMean   = np.mean(Z2)
+#   Phi     = ( mean(Z-max(Z))-1e-16)*cms/((cms)/1.3e9*1.0/360.00)
+   SigmZ   = np.std(Z2)
+   bgzA    = np.mean (bgz)
 
 
-   print ("Total Emission time [sec]  =", TotalEmissionTimeSec)
+   print ("Total Emission time [sec]  =", np.max(Z)-np.min(Z))
    print ("Mean gamma          [-]    =", np.mean(gamma))
    print ("Mean beta           [-]    =",np.mean(betaz))
    print ("Mean Kinetic Energy [eV]   =",MeanEk)
@@ -681,17 +686,16 @@ def dump_ImpactT_cathode(X,Y,T,PX,PY,PZ, fname='partcl.data'):
    print ("Sigma_z             [m]    =",SigmZ)
    
    
+   fid=open (fname,'w')
 
-   with open(fname, "w") as fid:
-       fid.write (str(N+1)+'\n')
+   fid.write (str(N+1)+'\n')
 
-       fid.write('{:19.12e}'.format(aux)+'{:19.12e}'.format(aux)+'{:19.12e}'.format(aux)+  \
-                 '{:19.12e}'.format(aux)+'{:19.12e}'.format(zMean)+'{:19.12e}'.format(bgzMean)+'\n')
-       for i in range(N):
-           fid.write('{:19.12e}'.format(X[i])+'{:19.12e}'.format(bgx[i])+'{:19.12e}'.format(Y[i])+  \
-               '{:19.12e}'.format(bgy[i])+'{:19.12e}'.format(Z[i])+'{:19.12e}'.format(bgz[i])+'\n')
-		
-		
+   fid.write('{:13.5e}'.format(aux)+'{:13.5e}'.format(aux)+'{:13.5e}'.format(aux)+  \
+             '{:13.5e}'.format(aux)+'{:13.5e}'.format(zMean)+'{:13.5e}'.format(bgzA)+'\n')
+   for i in range(N):
+        fid.write('{:13.5e}'.format(X[i])+'{:13.5e}'.format(bgx[i])+'{:13.5e}'.format(Y[i])+  \
+            '{:13.5e}'.format(bgy[i])+'{:13.5e}'.format(Z2[i])+'{:13.5e}'.format(bgz[i])+'\n')
+
    fid.close()
    
    
