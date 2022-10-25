@@ -4,6 +4,12 @@ import matplotlib.pyplot as plt
 import sobol_lib as sob 
 import math 
 import time 
+from scipy import constants
+from openpmd_api import (Access, Dataset, Mesh_Record_Component, Series,
+                         Unit_Dimension)
+import matplotlib.pyplot as plt
+import makeopenpmd
+
 ''''
 Set of generic function for generating particle distributions for tracking code
 created AUG-27-2017 P. Piot, NIU
@@ -640,6 +646,16 @@ def gaussian_phase_space_2dof(n, alphax, betax, emitgeomx,\
 
 ############### dumping of particle distribution in files #############################
 
+def dump_WarpX (x,y,z,px,py,pz,qbunch,fname='warpXinput.h5'):
+   '''
+    expect X[m], Y[m]. Z[sec]. PX[eV/c], PY[eV/c], PZ[eV/c]
+   '''
+   px = px*constants.physical_constants['electron volt'][0]/constants.physical_constants['speed of light in vacuum'][0]
+   py = py*constants.physical_constants['electron volt'][0]/constants.physical_constants['speed of light in vacuum'][0]
+   pz = pz*constants.physical_constants['electron volt'][0]/constants.physical_constants['speed of light in vacuum'][0]
+   makeopenpmd.make_openPMD(x, y, z, px, py, pz, fname, qbunch)
+   
+   
 def dump_ImpactT_cathode(X,Y,Z,PX,PY,PZ, fname='partcl.data'):
 
    '''
