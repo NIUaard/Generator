@@ -366,7 +366,7 @@ def Gauss_4d_cart_cut (n, corr01, corr23, cut):
          
    return(out)
 
-def mc_1D (n,func,minOrd, maxOrd):
+def mc_1D (n,func,minOrd, maxOrd, maxFunc=1):
    '''
    generate a distribution via a Monte-Carlo rejection 
    with density function given by func peak normalized to on 
@@ -390,8 +390,8 @@ def mc_1D (n,func,minOrd, maxOrd):
          print ("needed=", needed)
       gen=Unif_2d_cart(needed)
       x=minOrd + gen[0,:]*(maxOrd-minOrd)
-      y= gen[1,:]*1.2
-      keep   = np.where(func(x)>gen[1,:])
+      y= gen[1,:]*1.2*maxFunc
+      keep   = np.where(func(x)>y)
       Ngood  = len(keep[0])
       ind_f  = ind_i + Ngood
       if DEB==1: 
@@ -412,7 +412,7 @@ def mc_1D (n,func,minOrd, maxOrd):
    return(out)
       
       
-def mc_3DBoundary (n,func):
+def mc_3DBoundary (n,func, maxFunc=1):
    '''
    generate a distribution via a Monte-Carlo rejection 
    with density function given by func peak normalized to one 
@@ -436,7 +436,7 @@ def mc_3DBoundary (n,func):
          print ("needed=", needed)
          print ("shape out=", np.shape(out))
       gen=Unif_4d_cart(needed)
-      gen[:-1,:] = (gen[:-1,:]-0.5)*2.2 #ensures -1.1<(x,y,z)<1.1 
+      gen[:-1,:] = (gen[:-1,:]-0.5)*2.2 #ensures -1.1<(x,y,z)<1.1*maxFunc
       x= gen[0,:]
       y= gen[1,:]
       z= gen[2,:]
@@ -603,7 +603,7 @@ def momt_cold (N, Ekin):
    return (PX, PY, PZ)
    
 
-def gaussian_phase_space_1dof(n, alpha, beta, emitgeom, cut):   
+def gaussian_phase_space_1dof(n, alpha, beta, emitgeom, Cut=4):   
    '''
      generate a Gaussian phase space (x,x')with given 
      CS (alpha, beta) and emittance (emit) parameters. 
@@ -613,14 +613,14 @@ def gaussian_phase_space_1dof(n, alpha, beta, emitgeom, cut):
    gamma=(1+alpha**2)/beta
    sigma_xp = np.sqrt(emitgeom*gamma)  # uncorrelated momentum spread
    corr     = - alpha/np.sqrt(1+alpha**2)
-   out=Gauss_2d_cart_cut (n, corr, cut)
+   out=Gauss_2d_cart_cut (n, corr, Cut)
    out[0,:]=out[0,:]*sigma_x
    out[1,:]=out[1,:]*sigma_xp
    return(out[0,:], out[1,:])
    
 
 def gaussian_phase_space_2dof(n, alphax, betax, emitgeomx,\
-                                    alphay, betay, emitgeomy, cut):   
+                                    alphay, betay, emitgeomy,  Cut=4):   
    '''
      generate a Gaussian phase space (x,x',y,y')with given 
      CS (alpha, beta) and emittance (emit) parameters. 
@@ -634,7 +634,7 @@ def gaussian_phase_space_2dof(n, alphax, betax, emitgeomx,\
    gammay   = (1+alphay**2)/betay
    sigma_yp = np.sqrt(emitgeomy*gammay)  # uncorrelated momentum spread
    corry    = - alphay/np.sqrt(1+alphay**2)
-   out=Gauss_4d_cart_cut (n, corrx, corry, cut)
+   out=Gauss_4d_cart_cut (n, corrx, corry, Cut)
    out[0,:]=out[0,:]*sigma_x
    out[1,:]=out[1,:]*sigma_xp
    out[2,:]=out[2,:]*sigma_y
