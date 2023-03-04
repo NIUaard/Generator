@@ -9,6 +9,7 @@ from openpmd_api import (Access, Dataset, Mesh_Record_Component, Series,
                          Unit_Dimension)
 import matplotlib.pyplot as plt
 import makeopenpmd
+from scipy import constants
 
 ''''
 Set of generic function for generating particle distributions for tracking code
@@ -18,8 +19,9 @@ created AUG-27-2017 P. Piot, NIU
 
 '''
 m_ec2 = 0.5109e6
-cms   = 299792458.
-DEB = 0
+cms   = constants.value(u'speed of light in vacuum')
+
+DEB   = 0
 ############### elementary generating functions #############################
 
 def Unif_1d (n, skip=None):
@@ -138,7 +140,23 @@ def Unif_5d_cart (n, skip=None):
       skip=np.random.random_integers(0,1000)
    out=sob.i4_sobol_generate (5,n,skip)
    return(out)
-   
+
+def Unif_6d_cart (n, skip=None):
+   '''
+   generates a uniform distribution in 6D within [0,1] 
+   '''
+   global DEB
+   if DEB==1:
+      print ('>>>> Unif_6d_cart')
+      
+   if skip==None:
+      skip=np.random.random_integers(0,1000)
+   out=sob.i4_sobol_generate (6,n,skip)
+
+   if DEB==1:
+      print (np.shape(out))
+   return(out)
+
 def Gauss_2d_cart (n, corr, skip=None):
    '''
    generates a 2D Gaussian distribution in x, y sigmas=1 in both directions
@@ -181,7 +199,38 @@ def Gauss_4d_cart (n, corr01, corr23, skip=None):
    out[3,:]=np.sqrt(-2*np.log(u))*np.sin(2*np.pi*v)
    return(out)
 
-   
+def Gauss_6d_cart (n, corr01, corr23, corr45, skip=None):
+   '''
+   generates a 6D Gaussian distribution in x, y, z sigmas=1 in both directions
+   the distribution with correlation corr
+   corr01: correlation between columns 0 and 1 
+   corr23: correlation between columns 2 and 3 
+   corr45: correlation between columns 2 and 3 
+   '''
+   global DEB
+   if DEB==1:
+      print ('>>>> Gauss_6d_cart')
+      
+   U=Unif_6d_cart (n, skip)
+   u=U[0,:]
+   v=U[1,:]
+   out=np.zeros((6,n))
+   out[0,:]=np.sqrt(-2*np.log(u))*(np.sqrt(1-corr01**2)*np.cos(2*np.pi*v)+corr01*np.sin(2*np.pi*v))
+   out[1,:]=np.sqrt(-2*np.log(u))*np.sin(2*np.pi*v)
+#
+   u=U[2,:]
+   v=U[3,:]
+   out[2,:]=np.sqrt(-2*np.log(u))*(np.sqrt(1-corr23**2)*np.cos(2*np.pi*v)+corr23*np.sin(2*np.pi*v))
+   out[3,:]=np.sqrt(-2*np.log(u))*np.sin(2*np.pi*v)
+#
+   u=U[4,:]
+   v=U[5,:]
+   out[4,:]=np.sqrt(-2*np.log(u))*(np.sqrt(1-corr45**2)*np.cos(2*np.pi*v)+corr45*np.sin(2*np.pi*v))
+   out[5,:]=np.sqrt(-2*np.log(u))*np.sin(2*np.pi*v)
+
+   return(out)
+
+
 def Unif_2d_rad (n, skip=None):
    '''
    generate a uniform distribution between r in [0,1] and phi in [0, 2pi]
@@ -370,6 +419,64 @@ def Gauss_4d_cart_cut (n, corr01, corr23, cut, keeper='sqr'):
       ind_i  = ind_f
          
    return(out)
+
+def Gauss_6d_cart_cut (n, corr01, corr23, corr45, cut, keeper='sqr'):
+   '''
+   generate a 4D Gaussian distribution in with a sigma of 1 and cut in sigma unit
+   the cut applies in both directions
+   corr01: correlation between columns 0 and 1 
+   corr23: correlation between columns 2 and 3 
+   '''
+   global DEB
+   if DEB==1:
+      print ('>>>> Gauss_6d_cart_cut')
+      
+   out=np.zeros((6,n))
+   needed = n
+   ind_i  = 0 
+   ind_f  = 0 
+   while needed>0:
+      if DEB==1: 
+          print ('<-start', needed, ind_i)
+      gen    = Gauss_6d_cart (needed, corr01, corr23, corr45)
+      
+      if keeper=='sqr':
+         keep   = np.where((np.abs(gen[0,:])<=cut) & (np.abs(gen[1,:])<=cut) & \
+                           (np.abs(gen[2,:])<=cut) & (np.abs(gen[3,:])<=cut) & \
+                           (np.abs(gen[4,:])<=cut) & (np.abs(gen[5,:])<=cut))
+      if keeper=='ell':
+         keep   = np.where(np.sqrt(gen[0,:]**2+gen[1,:]**2+ \
+                                   gen[2,:]**2+gen[3,:]**2+gen[4,:]**2+gen[5,:]**2))
+      Ngood  = len(keep[0])
+      ind_f  = ind_i + Ngood
+      if DEB==1: 
+         print ('.. fill', Ngood, ind_i, ind_f)
+      if ind_f<=n: 
+         if DEB==1: 
+            print ('ind_f<n', keep)
+         out[0,ind_i:ind_f]=gen[0,keep]
+         out[1,ind_i:ind_f]=gen[1,keep]
+         out[2,ind_i:ind_f]=gen[2,keep]
+         out[3,ind_i:ind_f]=gen[3,keep]
+         out[4,ind_i:ind_f]=gen[4,keep]
+         out[5,ind_i:ind_f]=gen[5,keep]
+      if ind_f>n:
+         if DEB==1: 
+            print ('ind_f>n')
+         ind_f=n
+         temp=gen[keep]
+         out[0, ind_i:ind_f]=gen[0, keep[0:n-ind_i]]
+         out[1, ind_i:ind_f]=gen[1, keep[0:n-ind_i]]
+         out[2, ind_i:ind_f]=gen[2, keep[0:n-ind_i]]
+         out[3, ind_i:ind_f]=gen[3, keep[0:n-ind_i]]
+         out[4, ind_i:ind_f]=gen[4, keep[0:n-ind_i]]
+         out[5, ind_i:ind_f]=gen[5, keep[0:n-ind_i]]
+         
+      needed = n-ind_f
+      ind_i  = ind_f
+         
+   return(out)
+
 
 def mc_1D (n,func,minOrd, maxOrd, maxFunc=1):
    '''
@@ -649,6 +756,40 @@ def gaussian_phase_space_2dof(n, alphax, betax, emitgeomx,\
 
 
 
+def gaussian_phase_space_3dof(n, alphax, betax, emitgeomx,\
+                                 alphay, betay, emitgeomy,\
+                                 sigma_z, sigma_Incdpp, LPSchirp, \
+                                 Cut=4, keeper='sqr'):   
+   '''
+     generate a Gaussian phase space (x,x',y,y', z, delta) with given 
+     CS (alpha, beta) and emittance (emit) parameters, for the 4D phase space
+     sigmaz, sigmadelta and chirp (in m**-1) for the LPS
+     cut: number of sigma for cut
+   '''
+
+   sigma_x   = np.sqrt(betax*emitgeomx)
+   gammax    = (1+alphax**2)/betax
+   sigma_xp  = np.sqrt(emitgeomx*gammax)  # uncorrelated momentum spread
+   corrx     = - alphax/np.sqrt(1+alphax**2)
+   sigma_y   = np.sqrt(betay*emitgeomy)
+   gammay    = (1+alphay**2)/betay
+   sigma_yp  = np.sqrt(emitgeomy*gammay)  # uncorrelated momentum spread
+   corry     = - alphay/np.sqrt(1+alphay**2)
+   sigma_dpp = np.sqrt(sigma_Incdpp**2+(LPSchirp*sigma_z)**2)
+   corrz     = LPSchirp*sigma_z/sigma_dpp
+   out=Gauss_6d_cart_cut (n, corrx, corry, corrz, Cut, keeper=keeper)
+   out[0,:]=out[0,:]*sigma_x
+   out[1,:]=out[1,:]*sigma_xp
+   out[2,:]=out[2,:]*sigma_y
+   out[3,:]=out[3,:]*sigma_yp
+   out[4,:]=out[4,:]*sigma_z
+   out[5,:]=out[5,:]*sigma_dpp
+   return(out[0,:], out[1,:], out[2,:], out[3,:], out[4,:], out[5,:])
+   
+
+
+
+    
 ############### dumping of particle distribution in files #############################
 
 def dump_WarpX (x,y,z,px,py,pz,qbunch,fname='warpXinput.h5'):
