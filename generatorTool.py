@@ -275,7 +275,7 @@ def Unif_3d_super_ellipsoid (n, a, b, c, na, nb, nc, skip=None):
     out[2,:] = rad * c * np.abs(np.cos(phi))**(2./nc)*np.sign(np.cos(phi))
     return(out)
    
-def Gauss_2d_cart_cut (n, corr, cut):
+def Gauss_2d_cart_cut (n, corr, cut, keeper='sqr'):
    '''
    generate a 2D Gaussian distribution in with a sigma of 1 and cut in sigma unit
    the cut applies in both directions
@@ -293,7 +293,10 @@ def Gauss_2d_cart_cut (n, corr, cut):
           print ('<-start', needed, ind_i)
       gen    = Gauss_2d_cart (needed, corr)
       
-      keep   = np.where((np.abs(gen[0,:])<=cut) & (np.abs(gen[1,:])<=cut))
+      if keeper=='sqr':
+          keep   = np.where((np.abs(gen[0,:])<=cut) & (np.abs(gen[1,:])<=cut))
+      if keeper=='ell':
+          keep   = np.where(np.sqrt(gen[0,:]**2+gen[1,:]**2)<=cut) 
 
       Ngood  = len(keep[0])
       ind_f  = ind_i + Ngood
@@ -317,7 +320,7 @@ def Gauss_2d_cart_cut (n, corr, cut):
          
    return(out)
 
-def Gauss_4d_cart_cut (n, corr01, corr23, cut):
+def Gauss_4d_cart_cut (n, corr01, corr23, cut, keeper='sqr'):
    '''
    generate a 4D Gaussian distribution in with a sigma of 1 and cut in sigma unit
    the cut applies in both directions
@@ -337,9 +340,11 @@ def Gauss_4d_cart_cut (n, corr01, corr23, cut):
           print ('<-start', needed, ind_i)
       gen    = Gauss_4d_cart (needed, corr01, corr23)
       
-      keep   = np.where((np.abs(gen[0,:])<=cut) & (np.abs(gen[1,:])<=cut) & \
+      if keeper=='sqr':
+         keep   = np.where((np.abs(gen[0,:])<=cut) & (np.abs(gen[1,:])<=cut) & \
                         (np.abs(gen[2,:])<=cut) & (np.abs(gen[3,:])<=cut))
-
+      if keeper=='ell':
+         keep   = np.where(np.sqrt(gen[0,:]**2+gen[1,:]**2+gen[2,:]**2+gen[3,:]**2))
       Ngood  = len(keep[0])
       ind_f  = ind_i + Ngood
       if DEB==1: 
@@ -620,7 +625,7 @@ def gaussian_phase_space_1dof(n, alpha, beta, emitgeom, Cut=4):
    
 
 def gaussian_phase_space_2dof(n, alphax, betax, emitgeomx,\
-                                    alphay, betay, emitgeomy,  Cut=4):   
+                                    alphay, betay, emitgeomy,Cut=4, keeper='sqr'):   
    '''
      generate a Gaussian phase space (x,x',y,y')with given 
      CS (alpha, beta) and emittance (emit) parameters. 
@@ -634,7 +639,7 @@ def gaussian_phase_space_2dof(n, alphax, betax, emitgeomx,\
    gammay   = (1+alphay**2)/betay
    sigma_yp = np.sqrt(emitgeomy*gammay)  # uncorrelated momentum spread
    corry    = - alphay/np.sqrt(1+alphay**2)
-   out=Gauss_4d_cart_cut (n, corrx, corry, Cut)
+   out=Gauss_4d_cart_cut (n, corrx, corry, Cut, keeper=keeper)
    out[0,:]=out[0,:]*sigma_x
    out[1,:]=out[1,:]*sigma_xp
    out[2,:]=out[2,:]*sigma_y
