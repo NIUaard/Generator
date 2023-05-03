@@ -29,6 +29,7 @@ def make_openPMD(x, y, z, px, py, pz, filename, qtotal, species_name='myparticle
     # define a charge                     quantity is "Current * Time" in ISQ
     electrons["charge"].unit_dimension = {Unit_Dimension.I: 1, Unit_Dimension.T: 1,}
     num = x.size
+    print ("number of macroparticle:",  num)
     electrons["charge"][SCALAR].unit_SI = -1.0  # data below is already in Coulomb
     dset = Dataset(np.dtype("float64"), extent=[num])
     electrons["charge"][SCALAR].reset_dataset(dset)
@@ -36,6 +37,7 @@ def make_openPMD(x, y, z, px, py, pz, filename, qtotal, species_name='myparticle
 
     # now all other attributes
     weight = np.abs(qtotal / num / 1.60217662e-19)
+    electrons["weighting"][SCALAR].reset_dataset(dset)
     electrons["weighting"][SCALAR].make_constant(weight)
     
     # mass
